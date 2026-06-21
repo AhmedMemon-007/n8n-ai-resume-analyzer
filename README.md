@@ -108,15 +108,11 @@ CareerIQ.pdf
 
 ### Form Submission
 
-Add form screenshot here.
-
-### Generated Report
-
-Add generated report screenshot here.
+CareerIQ.pdf
 
 ### Email Delivery
 
-Add email report screenshot here.
+CareerIQ.pdf
 
 ---
 
