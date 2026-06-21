@@ -161,5 +161,3 @@ This project demonstrates:
 ## Author
 
 **Muhammad Ahmed Memon**
-
-GitHub: https://github.com/immemon
