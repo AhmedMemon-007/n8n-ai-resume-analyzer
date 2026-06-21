@@ -1,0 +1,248 @@
+{
+  "name": "CareerIQ: AI Resume Analyzer & Job Matcher",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "AI Resume Analyzer & Job Matcher",
+        "formDescription": "Upload your resume and select your target job role to receive an AI-powered analysis, job match score, skill gap assessment, and personalized learning roadmap.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Target Role",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Upload Resume (PDF)",
+              "fieldType": "file",
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -224,
+        -176
+      ],
+      "id": "73af23f5-632d-471a-9a4c-3944665cd6f3",
+      "name": "On form submission",
+      "webhookId": "d4513c86-2603-462a-8e8c-c26ce1f86e38"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "Upload_Resume__PDF_",
+        "options": {
+          "joinPages": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        -176
+      ],
+      "id": "98eb4552-0ebb-4b94-b06d-d878d18b7055",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the resume and compare it against the requirements of the target role.\n\nProvide:\n- ATS Score\n- Job Match Score\n- Missing Skills\n- Learning Roadmap\n- Recommended Projects\n- Final Hiring Recommendation\n\nTarget Role:\n{{ $json[\"Target Role\"] }}\n\nResume:\n\n{{ $json.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an expert ATS Resume Analyzer, Technical Recruiter, and Career Advisor.\n\nYour task is to analyze the candidate's resume against their target role.\n\nProvide the following sections:\n\n1. Candidate Overview\n   - Name\n   - Education\n   - Experience Level\n\n2. Technical Skills\n   - Programming Languages\n   - Frameworks\n   - Databases\n   - Tools & Technologies\n\n3. Strengths\n   - List the candidate's strongest qualifications\n\n4. Areas for Improvement\n   - Missing skills\n   - Weak areas\n   - Recommendations\n\n5. ATS Score\n   - Give a score out of 100\n   - Explain the score\n\n6. Job Match Score\n   - Give a score out of 100 for the target role\n   - Explain the score\n\n7. Missing Skills\n   - List skills required for the target role that are not present in the resume\n\n8. Learning Roadmap\n   - Create a practical 3-month learning plan\n\n9. Recommended Projects\n   - Suggest 3 portfolio projects that would improve the candidate's profile\n\n10. Final Recommendation\n   - Strong Fit / Moderate Fit / Weak Fit\n\nBe professional, concise, and actionable.\n\nFormat the response using clear headings and bullet points."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        224,
+        -176
+      ],
+      "id": "e5e8d001-81ed-4c47-b9bb-9ad7d7ea56c0",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        304,
+        48
+      ],
+      "id": "1abc2865-fd8a-4f82-80e4-2bea11dd6a66",
+      "name": "Mistral Cloud Chat Model",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "qQVkCSZo90Ryy6jz",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Convert the report into a professional HTML email.  Use: - H1 title - H2 section headings - Bullet points - Horizontal separators  Return only HTML."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        576,
+        -176
+      ],
+      "id": "edc240f6-149c-43c9-a359-2e81b029d943",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        656,
+        48
+      ],
+      "id": "922b2335-d9a2-4b7a-9e0b-615e4b6eef8b",
+      "name": "Mistral Cloud Chat Model1",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "qQVkCSZo90Ryy6jz",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json[\"Email\"] }}",
+        "subject": "Your AI Resume Analysis & Job Match Report",
+        "message": "={{ $json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        928,
+        -176
+      ],
+      "id": "01de72c5-42dd-46d3-8dd7-fde5bb80a8ef",
+      "name": "Send a message",
+      "webhookId": "6a9d1c7f-6194-4da0-9e16-3402f93a2a8c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1pFny1KlJwtzYuEG",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mistral Cloud Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mistral Cloud Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ba38cc08-ae98-4606-bcb7-3db1ec556924",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "953bac2f41c9503bfa0321084719b585b331fdf450c81deea798d9d5ca8dde74"
+  },
+  "nodeGroups": [],
+  "id": "pY6HPGGRLfD5Z4AH",
+  "tags": []
+}
